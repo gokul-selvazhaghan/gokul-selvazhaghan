@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Year Greetings</title>
+    <style>
+        :root {
+            --text-color: white;
+            --bg-color: black;
+            --firework-color: rgba(255, 255, 255, 0.9);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .countdown {
+            font-size: 2em;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .message {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .message h1 {
+            font-size: 3em;
+            margin: 10px 0;
+        }
+
+        .fireworks {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        canvas {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="countdown">Loading Countdown...</div>
+
+    <div class="message">
+        <h1>Happy New Year 2025!</h1>
+        <p>May this year bring joy, health, and prosperity to your life!</p>
+    </div>
+
+    <div class="fireworks"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const countdownElement = document.querySelector(".countdown");
+            const messageElement = document.querySelector(".message");
+            const targetDate = new Date("January 1, 2025 00:00:00").getTime();
+
+            const updateCountdown = () => {
+                const now = new Date().getTime();
+                const gap = targetDate - now;
+
+                if (gap <= 0) {
+                    countdownElement.style.display = "none";
+                    messageElement.style.display = "block";
+                    startFireworks();
+                    return;
+                }
+
+                const days = Math.floor(gap / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((gap % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((gap % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((gap % (1000 * 60)) / 1000);
+
+                countdownElement.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+            };
+
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        });
+
+        const startFireworks = () => {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            document.querySelector(".fireworks").appendChild(canvas);
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const createParticle = (x, y, color) => {
+                return {
+                    x,
+                    y,
+                    color,
+                    radius: Math.random() * 2 + 1,
+                    speedX: Math.random() * 4 - 2,
+                    speedY: Math.random() * 4 - 2,
+                    alpha: 1
+                };
+            };
+
+            const particles = [];
+
+            const drawParticles = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach((particle, index) => {
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${particle.color}, ${particle.alpha})`;
+                    ctx.fill();
+
+                    particle.x += particle.speedX;
+                    particle.y += particle.speedY;
+                    particle.alpha -= 0.01;
+
+                    if (particle.alpha <= 0) {
+                        particles.splice(index, 1);
+                    }
+                });
+            };
+
+            const spawnFirework = () => {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const color = `${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}`;
+
+                for (let i = 0; i < 50; i++) {
+                    particles.push(createParticle(x, y, color));
+                }
+            };
+
+            setInterval(() => {
+                spawnFirework();
+            }, 500);
+
+            const animate = () => {
+                drawParticles();
+                requestAnimationFrame(animate);
+            };
+
+            animate();
+
+            window.addEventListener("resize", () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        };
+    </script>
+</body>
+</html>
